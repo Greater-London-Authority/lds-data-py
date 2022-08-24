@@ -5,7 +5,6 @@ Vaguely inspired by https://github.com/Greater-London-Authority/ldndatar althoug
 
 # Usage
 Using pip:
-(this isn't complete and won't work as this repo is private...)
 ```
 pip install git+ssh://git@github.com/Greater-London-Authority/lds-data-py.git
 ```
