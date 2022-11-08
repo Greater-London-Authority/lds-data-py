@@ -37,6 +37,17 @@ class LdsAgent:
             raise EmptyResponseException()
         return detail['resources']
 
+    def delete_resource(self, dataset, resource_id):
+        url = '%s/api/dataset/%s/' % (self.site, dataset)
+        endpoint = '/resources/%s' % (resource_id)
+        response = requests.patch(url,
+            headers = {'Authorization': self.api_key, 'Content-Type': 'application/json'},
+            json = {'op': 'remove', 'path': endpoint}
+        )
+        print(response.request.url)
+        print(response.request.body)
+        print(response.request.headers)
+
 
     # Update an existing resource in this dataset
     def update_resource(self, dataset, key, srcfile):
@@ -45,6 +56,14 @@ class LdsAgent:
             files = {'file': open(srcfile, 'rb')},
             headers = {'Authorization': self.api_key},
             data = {})
+
+    def update_metadata(self, dataset, resource_id, key, value):
+        url = '%s/api/dataset/%s/' % (self.site, dataset)
+        endpoint = '/resources/%s/%s' % (resource_id, key)
+        requests.patch(url,
+            headers = {'Authorization': self.api_key},
+            data = {'op': 'add', 'path': endpoint, 'value': value}
+        )
 
     # Downloads a resource in this dataset
     def download_resource(self, dataset, key, destfile):
@@ -57,13 +76,11 @@ class LdsAgent:
 
     # Add a new resource to this dataset
     # Don't use this if the file already exists. The server will duplicate it.
-    def add_resource(self, dataset, title, srcfile):
-        metadata = {}
+    def add_resource(self, dataset, srcfile, mime_type):
         url = '%s/api/dataset/%s/resources/' % (self.site, dataset)
-        metadata['title'] = title
         requests.post(url,
             files = {'file': open(srcfile, 'rb')},
-            headers = {'Authorization': self.api_key},
+            headers = {'Authorization': self.api_key, 'Content-Type': mime_type},
             data = {})
 
 
