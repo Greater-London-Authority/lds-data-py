@@ -1,5 +1,5 @@
 from lds_data import ldsagent
-from lds_data.cli import copy
+from lds_data.cli import copy, empty
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
@@ -15,6 +15,10 @@ if args.action == 'copy':
     if args.output == None:
         raise "Output dataset must be specified"
     copy.dataset_copy(args.input, args.output)
+elif args.action == 'delete':
+    if args.input == None:
+        raise "Input dataset must be specified"
+    empty.dataset_empty(args.input)
 else:
     parser.print_help()
 
