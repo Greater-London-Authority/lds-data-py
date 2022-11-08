@@ -9,9 +9,14 @@ This is an extremely unstable implementation. Classes and functions are likely t
 If you're interested in using it, please contact Sven <sven.latham@london.gov.uk> and we can work together!
 
 # Usage
-Using pip:
+Get the latest version:
 ```
 pip install git+ssh://git@github.com/Greater-London-Authority/lds-data-py.git
+```
+
+Run the CLI (basic interactions):
+```
+python cli.py -a {action} -i {input dataset} [-o {output dataset}]
 ```
 
 
