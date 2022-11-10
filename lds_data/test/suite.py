@@ -42,7 +42,6 @@ def test():
 
     resource_id = list(resources.keys())[0]
     file = resources[resource_id]
-    
     # Check hash is intact
     hash = file['check_hash']
     if hash != 'edc900745c5d15d773fbcdc0b376f00c': # md5 of "Test file"

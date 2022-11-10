@@ -45,10 +45,27 @@ class LdsAgent:
         r = requests.get(url, headers={'Authorization': self.api_key})
         r.raise_for_status()
         detail = json.loads(r.text)
-                    
         if not 'resources' in detail:
             raise EmptyResponseException()
-        return detail['resources'] # This presents a dict of resources
+
+        def normalise_resource(r):
+            # This provides a default if certain check_ keys do not exist:
+            # Function needs to improve; this'll do for now to offer basic compatibility
+            if 'check_hash' not in r:
+                r['check_hash'] = None
+            if 'check_http_status' not in r:
+                r['check_http_status'] = None
+            if 'check_timestamp' not in r:
+                r['check_timestamp'] = None
+            if 'check_mimetype' not in r:
+                r['check_mimetype'] = None
+            if 'check_size' not in r:
+                r['check_size'] = None
+                
+            return r
+
+        resources = { k: normalise_resource(v) for k,v in detail['resources'].items() }
+        return resources # This presents a dict of resources
 
     def delete_resource(self, dataset, resource_id):
         url = '%s/api/dataset/%s/' % (self.site, dataset)
