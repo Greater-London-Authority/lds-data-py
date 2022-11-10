@@ -3,7 +3,7 @@ import os
 
 def test():
     api_key=os.environ['DATASTORE_API']
-    dataset = 'test-files'
+    dataset = 'lds-api-test-area'
 
     agent = ldsagent.LdsAgent(api_key)
     resources = agent.get_resources(dataset)
@@ -12,13 +12,13 @@ def test():
     # TODO create a clean environment and do proper assertions
 
     # Create a test local dir:
-    if not os.path.exists("test-files"):
-        os.mkdir("test-files")
+    if not os.path.exists("lds-api-test-area"):
+        os.mkdir("lds-api-test-area")
 
-    agent.sync_dir(dataset, "test-files")
+    agent.sync_dir(dataset, "lds-api-test-area")
 
 
-#    os.remove("test-files/a.html")
-#    os.rmdir("test-files")
+#    os.remove("lds-api-test-area/a.html")
+#    os.rmdir("lds-api-test-area")
 
     
