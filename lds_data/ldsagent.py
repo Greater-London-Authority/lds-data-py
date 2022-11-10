@@ -23,6 +23,19 @@ class LdsAgent:
             raise 'API Key not set'
         self.api_key = api_key
         self.site = 'https://data.london.gov.uk'
+        self.debug = False
+        self.debug_traffic = False
+
+    def debugmsg(self, msg):
+        if self.debug:
+            print("DEBUG: %s" % msg)
+
+    def debugrequest(self, response):
+        if self.debug_traffic:
+            print("Request URL: %s" % response.request.url)
+            print("Request Body: %s" % response.request.body)
+            print("Response Status Code: %s" % response.status_code)
+            print("Response Content: %s" % response.content)
         
 
 
@@ -35,35 +48,38 @@ class LdsAgent:
                     
         if not 'resources' in detail:
             raise EmptyResponseException()
-        return detail['resources']
+        return detail['resources'] # This presents a dict of resources
 
     def delete_resource(self, dataset, resource_id):
         url = '%s/api/dataset/%s/' % (self.site, dataset)
         endpoint = '/resources/%s' % (resource_id)
         response = requests.patch(url,
             headers = {'Authorization': self.api_key, 'Content-Type': 'application/json'},
-            json = {'op': 'remove', 'path': endpoint}
+            json = [{'op': 'remove', 'path': endpoint}]
         )
-        print(response.request.url)
-        print(response.request.body)
-        print(response.request.headers)
+
+        # op: "replace", path: "/updatedAt", value: "2022-11-10T17:11:32.791Z"
+        self.debugrequest(response)
+
 
 
     # Update an existing resource in this dataset
     def update_resource(self, dataset, key, srcfile):
         url = '%s/api/dataset/%s/resources/%s' % (self.site, dataset, key)
-        requests.post(url,
+        response = requests.post(url,
             files = {'file': open(srcfile, 'rb')},
             headers = {'Authorization': self.api_key},
             data = {})
+        self.debugrequest(response)
 
     def update_metadata(self, dataset, resource_id, key, value):
         url = '%s/api/dataset/%s/' % (self.site, dataset)
         endpoint = '/resources/%s/%s' % (resource_id, key)
-        requests.patch(url,
+        response = requests.patch(url,
             headers = {'Authorization': self.api_key},
             data = {'op': 'add', 'path': endpoint, 'value': value}
         )
+        self.debugrequest(response)
 
     # Downloads a resource in this dataset
     def download_resource(self, dataset, key, destfile):
@@ -72,16 +88,19 @@ class LdsAgent:
         response = requests.get(url,
             headers = {'Authorization': self.api_key})
         open(destfile, "wb").write(response.content)
+        self.debugrequest(response)
 
 
     # Add a new resource to this dataset
     # Don't use this if the file already exists. The server will duplicate it.
     def add_resource(self, dataset, srcfile, mime_type):
         url = '%s/api/dataset/%s/resources/' % (self.site, dataset)
-        requests.post(url,
+        response = requests.post(url,
             files = {'file': open(srcfile, 'rb')},
-            headers = {'Authorization': self.api_key, 'Content-Type': mime_type},
+            headers = {'Authorization': self.api_key},
             data = {})
+        self.debugrequest(response)
+
 
 
     # Downloads all resources in a dataset to a local folder
