@@ -2,6 +2,7 @@ import requests
 import os
 import json
 import hashlib
+import re
 from urllib.parse import urlparse
 
 class EmptyResponseException(Exception):
@@ -130,7 +131,7 @@ class LdsAgent:
 
 
     # Downloads all resources in a dataset to a local folder
-    def download_dataset(self, dataset, dest):
+    def download_dataset(self, dataset, dest, verbose=True, pattern='^'):
         filemap = {} # This will contain a list of client-side keys using the filename as index
 
         # Create a dict of local hashes
@@ -154,20 +155,25 @@ class LdsAgent:
             else:
                 filename = ("%s%s" % (filename, format))
 
-
-            print("Considering file %s for download" % (filename))
+            file_matches_pattern = bool(re.search(pattern, filename))
+            
+            if file_matches_pattern:
+                if verbose:
+                    print("Considering file %s for download" % (filename))
 
             filepath = ("%s/%s" % (dest, filename))
 
-            if filename in filemap.keys():
+            if filename in filemap.keys() and file_matches_pattern:
                 filehash = filemap[filename]
                 if serverhash != filehash:
-                    print ("- Server hash %s differs from client hash %s. Download required." % (serverhash, filehash))
+                    if verbose:
+                        print ("- Server hash %s differs from client hash %s. Download required." % (serverhash, filehash))
                     self.download_resource(dataset, key, filepath)
-                else:
+                elif verbose:
                     print ("- Server hash %s matches client hash, so no download required" % (serverhash))
             else:
-                print ("- File %s does not exist client side, so download is required" % (filename))
+                if verbose:
+                    print ("- File %s does not exist client side, so download is required" % (filename))
                 self.download_resource(dataset, key, filepath)
 
 
