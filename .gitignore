@@ -3,3 +3,4 @@ __pycache__/
 test-files/
 temp-xfer/
 lds-api-test-area/
+lds_data.egg-info

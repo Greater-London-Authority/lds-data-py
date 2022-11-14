@@ -2,6 +2,7 @@ import requests
 import os
 import json
 import hashlib
+import re
 from urllib.parse import urlparse
 
 class EmptyResponseException(Exception):
@@ -87,6 +88,12 @@ class LdsAgent:
         # op: "replace", path: "/updatedAt", value: "2022-11-10T17:11:32.791Z"
         self.debugrequest(response)
 
+        return response
+
+    def delete_dataset(self, dataset):
+        resources = self.get_resources(dataset)
+        for resource_id in resources.keys():
+            self.delete_resource(dataset, resource_id)
 
 
     # Update an existing resource in this dataset
@@ -119,7 +126,7 @@ class LdsAgent:
 
     # Add a new resource to this dataset
     # Don't use this if the file already exists. The server will duplicate it.
-    def add_resource(self, dataset, srcfile, mime_type):
+    def add_resource(self, dataset, srcfile, mime_type=None):
         url = '%s/api/dataset/%s/resources/' % (self.site, dataset)
         response = requests.post(url,
             files = {'file': open(srcfile, 'rb')},
@@ -127,10 +134,13 @@ class LdsAgent:
             data = {})
         self.debugrequest(response)
 
-
+    # Upload all files in a local directory as new resources to this dataset
+    def upload_local_dir(self, upload_dataset, upload_path):
+        for file in os.listdir(upload_path):
+            self.add_resource(upload_dataset, os.path.join(upload_path, file))
 
     # Downloads all resources in a dataset to a local folder
-    def download_dataset(self, dataset, dest):
+    def download_dataset(self, dataset, dest, verbose=True, pattern='^'):
         filemap = {} # This will contain a list of client-side keys using the filename as index
 
         # Create a dict of local hashes
@@ -154,20 +164,25 @@ class LdsAgent:
             else:
                 filename = ("%s%s" % (filename, format))
 
-
-            print("Considering file %s for download" % (filename))
+            file_matches_pattern = bool(re.search(pattern, filename))
+            
+            if file_matches_pattern:
+                if verbose:
+                    print("Considering file %s for download" % (filename))
 
             filepath = ("%s/%s" % (dest, filename))
 
-            if filename in filemap.keys():
+            if filename in filemap.keys() and file_matches_pattern:
                 filehash = filemap[filename]
                 if serverhash != filehash:
-                    print ("- Server hash %s differs from client hash %s. Download required." % (serverhash, filehash))
+                    if verbose:
+                        print ("- Server hash %s differs from client hash %s. Download required." % (serverhash, filehash))
                     self.download_resource(dataset, key, filepath)
-                else:
+                elif verbose:
                     print ("- Server hash %s matches client hash, so no download required" % (serverhash))
             else:
-                print ("- File %s does not exist client side, so download is required" % (filename))
+                if verbose:
+                    print ("- File %s does not exist client side, so download is required" % (filename))
                 self.download_resource(dataset, key, filepath)
 
 
