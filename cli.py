@@ -26,6 +26,18 @@ def handle_invocation(args):
         if args.output == None:
             raise CliInvocationException("Output dataset must be specified")
         copy.dataset_copy(args.input, args.output)
+
+        
+    elif args.action == 'download':
+        # API check
+        if 'DATASTORE_API' not in os.environ:
+            raise CliInvocationException("DATASTORE_API environment variable must be specified")
+
+        if args.input == None:
+            raise CliInvocationException("Input dataset must be specified")
+        copy.dataset_download(args.input)
+
+
     elif args.action == 'delete':
         if 'DATASTORE_API' not in os.environ:
             raise CliInvocationException("DATASTORE_API environment variable must be specified")

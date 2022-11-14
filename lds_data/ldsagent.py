@@ -2,6 +2,7 @@ import requests
 import os
 import json
 import hashlib
+from urllib.parse import urlparse
 
 class EmptyResponseException(Exception):
     pass
@@ -61,6 +62,14 @@ class LdsAgent:
                 r['check_mimetype'] = None
             if 'check_size' not in r:
                 r['check_size'] = None
+
+            # Provide a recommended filename based on the S3 URL:
+            parse = urlparse(r['url'])
+
+            # Strip everything in the path before the final forwardslash:
+            filename = "%s---%s" % (parse.path.rsplit('/',2)[1], parse.path.rsplit('/',2)[2])
+            r['generated_filename'] = filename
+            r['original_filename'] = parse.path.rsplit('/',2)[2] # This is the filename as provided to AWS/Datastore
                 
             return r
 
