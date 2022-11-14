@@ -128,7 +128,10 @@ class LdsAgent:
             data = {})
         self.debugrequest(response)
 
-
+    # Upload all files in a local directory as new resources to this dataset
+    def upload_local_dir(self, upload_dataset, upload_path):
+        for file in os.listdir(upload_path):
+            self.add_resource(upload_dataset, file, os.path.join(upload_path, file))
 
     # Downloads all resources in a dataset to a local folder
     def download_dataset(self, dataset, dest, verbose=True, pattern='^'):
