@@ -90,6 +90,10 @@ class LdsAgent:
 
         return response
 
+    def delete_dataset(self, dataset):
+        resources = self.get_resources(dataset)
+        for resource_id in resources.keys():
+            self.delete_resource(dataset, resource_id)
 
 
     # Update an existing resource in this dataset
