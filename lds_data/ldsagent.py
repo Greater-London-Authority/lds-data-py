@@ -88,6 +88,8 @@ class LdsAgent:
         # op: "replace", path: "/updatedAt", value: "2022-11-10T17:11:32.791Z"
         self.debugrequest(response)
 
+        return response
+
 
 
     # Update an existing resource in this dataset
@@ -120,7 +122,7 @@ class LdsAgent:
 
     # Add a new resource to this dataset
     # Don't use this if the file already exists. The server will duplicate it.
-    def add_resource(self, dataset, srcfile, mime_type):
+    def add_resource(self, dataset, srcfile, mime_type=None):
         url = '%s/api/dataset/%s/resources/' % (self.site, dataset)
         response = requests.post(url,
             files = {'file': open(srcfile, 'rb')},
@@ -131,7 +133,7 @@ class LdsAgent:
     # Upload all files in a local directory as new resources to this dataset
     def upload_local_dir(self, upload_dataset, upload_path):
         for file in os.listdir(upload_path):
-            self.add_resource(upload_dataset, file, os.path.join(upload_path, file))
+            self.add_resource(upload_dataset, os.path.join(upload_path, file))
 
     # Downloads all resources in a dataset to a local folder
     def download_dataset(self, dataset, dest, verbose=True, pattern='^'):
