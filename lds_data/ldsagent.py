@@ -116,6 +116,34 @@ class LdsAgent:
         open(destfile, "wb").write(response.content)
         self.debugrequest(response)
 
+    def download_dataset(self, input_dataset, output_dir):
+        input_resources = self.get_resources(input_dataset)
+
+        # Check the local folder exists and is empty:
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+        # We won't empty it automatically since we want the user to check
+        if len(os.listdir(output_dir)) != 0:
+            raise Exception("%s folder is not empty. Please delete this folder or empty it before proceeding." % output_dir)
+
+        # Write the resource list out to a JSON file:
+        filepath = os.path.join(output_dir, ".metadata.json")
+        with open(filepath, "w") as json_file:
+            json.dump(input_resources, json_file)
+        
+        for key in input_resources:
+            resource = input_resources[key]
+            filepath = os.path.join(output_dir, resource["generated_filename"])
+            self.download_resource(input_dataset, key, filepath)
+
+    # Empty a dataset.
+    def empty_dataset(self, input_dataset):
+        # Use with extreme caution!
+        input_resources = self.get_resources(input_dataset)
+
+        for key in input_resources:
+            resource = input_resources[key]
+            self.delete_resource(input_dataset, key)
 
     # Add a new resource to this dataset
     # Don't use this if the file already exists. The server will duplicate it.
