@@ -62,6 +62,8 @@ class LdsAgent:
                 r['check_mimetype'] = None
             if 'check_size' not in r:
                 r['check_size'] = None
+            if 'format' not in r:
+                r['format'] = 'raw'
 
             # Provide a recommended filename based on the S3 URL:
             parse = urlparse(r['url'])
